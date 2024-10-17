@@ -5,6 +5,7 @@ gem "pg", "~> 1.5"
 gem "puma", "~> 6.4"
 gem "bcrypt", "~> 3.1"
 gem "jwt", "~> 2.9"
+gem "dotenv-rails", "~> 3.1"
 
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "bootsnap", require: false
@@ -17,5 +18,4 @@ group :development, :test do
   gem "rubocop-rails-omakase", require: false
   gem "brakeman", require: false
   gem "rspec-rails", "~> 7.0"
-  gem "byebug", "~> 11.1"
 end
