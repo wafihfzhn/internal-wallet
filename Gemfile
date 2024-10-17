@@ -4,6 +4,7 @@ gem "rails", "~> 7.2"
 gem "pg", "~> 1.5"
 gem "puma", "~> 6.4"
 gem "bcrypt", "~> 3.1"
+gem "jwt", "~> 2.9"
 
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "bootsnap", require: false
