@@ -9,6 +9,7 @@ env:
   RAILS_ENV: test
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: postgres
+  HMAC_SECRET: as38ashlasd8liena8ab
 
 jobs:
   security:
