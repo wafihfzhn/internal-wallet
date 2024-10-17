@@ -1,55 +1,70 @@
-name: CI
+name: ci
 
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [master]
+
+env:
+  RAILS_ENV: test
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
 
 jobs:
-  scan_ruby:
+  security:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up Ruby
+      - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
           ruby-version: .ruby-version
           bundler-cache: true
-
       - name: Scan for common Rails security vulnerabilities using static analysis
         run: bin/brakeman --no-pager
 
-  scan_js:
+  tests:
     runs-on: ubuntu-latest
+    concurrency:
+      group: build-${{ github.ref }}-${{ matrix.spec-dirs }}
+      cancel-in-progress: true
+    strategy:
+      matrix:
+        spec-dirs: ["models", "linters", "requests"]
+
+    services:
+      db:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby
+      - name: Checkout Action
+        uses: actions/checkout@v3
+      - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: .ruby-version
-          bundler-cache: true
-
-      - name: Scan for security vulnerabilities in JavaScript dependencies
-        run: bin/importmap audit
-
-  lint:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: .ruby-version
-          bundler-cache: true
-
-      - name: Lint code for consistent style
-        run: bin/rubocop -f github
-
+          ruby-version: 3.3.5
+      - name: Install libpq-dev
+        run: sudo apt-get -yqq install libpq-dev
+      - name: Install bundler
+        run: gem install bundler
+      - name: Install gems
+        run: bundle install --jobs 4 --retry 3
+      - name: Copy config
+        run: cp config/database.yml.ci config/database.yml
+      - name: Initialize DB
+        run: |
+          bundle exec rails db:create
+          bundle exec rails db:migrate
+      - name: Run spec for ${{ matrix.spec-dirs }}
+        run: bundle exec rspec ./spec/${{ matrix.spec-dirs }}
