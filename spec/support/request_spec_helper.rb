@@ -29,7 +29,7 @@ module RequestSpecHelper
 
   def expect_error_response(status, message)
     expect(response).to have_http_status(status)
-    expect(response_body[:data][:error]).to eq(message)
+    expect(response_body[:error][:message]).to eq(message)
   end
 
 

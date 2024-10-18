@@ -9,7 +9,7 @@ class ApplicationController < ActionController::API
 
     @current_user ||= User.find(decoded_auth_token[:user_id])
   rescue ActiveRecord::RecordNotFound
-    raise ExceptionHandler::InvalidToken, "Invalid Token"
+    raise ExceptionHandler::Invalid, "Invalid Token"
   end
 
   def decoded_auth_token
