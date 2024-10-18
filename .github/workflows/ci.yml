@@ -7,6 +7,7 @@ on:
 
 jobs:
   security:
+    name: scan security vulnerabilities
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -20,6 +21,7 @@ jobs:
         run: bin/brakeman --no-pager
 
   test:
+    name: test ${{ matrix.name }}
     runs-on: ubuntu-latest
     env:
       RAILS_ENV: ${{ vars.RAILS_ENV }}
@@ -32,7 +34,10 @@ jobs:
       cancel-in-progress: true
     strategy:
       matrix:
-        spec-dirs: ["models", "linters", "requests"]
+        include:
+          - { name: models, spec-dirs: models }
+          - { name: linters, spec-dirs: linters }
+          - { name: requests, spec-dirs: requests }
 
     services:
       db:
@@ -50,11 +55,12 @@ jobs:
 
     steps:
       - name: Checkout Action
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.3.5
+          ruby-version: .ruby-version
+          bundler-cache: true
       - name: Install libpq-dev
         run: sudo apt-get -yqq install libpq-dev
       - name: Install bundler
