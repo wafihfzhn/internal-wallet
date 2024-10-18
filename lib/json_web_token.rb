@@ -9,7 +9,7 @@ class JsonWebToken
   def self.decode(token)
     body = JWT.decode(token, HMAC_SECRET)[0]
     ActiveSupport::HashWithIndifferentAccess.new body
-  rescue JWT::DecodeError => e
-    raise ExceptionHandler::Invalid, e.message
+  rescue JWT::DecodeError
+    raise ExceptionHandler::Invalid, "Invalid token"
   end
 end

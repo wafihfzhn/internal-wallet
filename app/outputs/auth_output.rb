@@ -10,6 +10,10 @@ class AuthOutput < ApiOutput
     }
   end
 
+  def login_format
+    format.merge(token: token)
+  end
+
   private
 
   def token

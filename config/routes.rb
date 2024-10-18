@@ -4,5 +4,6 @@ Rails.application.routes.draw do
   root to: proc { [ 200, { "Content-Type" => "application/json" }, [ '{"health": "ok"}' ] ] }
 
   # authentication
-  post "login" => "authentication#login"
+  post  "login" => "authentication#login"
+  get   "auth"  => "authentication#auth"
 end

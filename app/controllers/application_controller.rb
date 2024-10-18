@@ -2,31 +2,25 @@ class ApplicationController < ActionController::API
   include ExceptionHandler
   include OutputHandler
 
+  before_action :authenticate_access!
+
   private
 
   def current_user
-    return @current_user if defined? @current_user
-
     @current_user ||= User.find(decoded_auth_token[:user_id])
-  rescue ActiveRecord::RecordNotFound
-    raise ExceptionHandler::Invalid, "Invalid Token"
   end
 
   def decoded_auth_token
-    auth_token = request.authorization.to_s
-                        .match(/\A\W*bearer\W+(.*)/i).to_a
-                        .second
-
-    JsonWebToken.decode(auth_token)
+    @decoded_auth_token ||= JsonWebToken.decode(http_auth_header)
   end
 
-  def logged_in?
-    !!current_user
+  def http_auth_header
+    return request.authorization.to_s.split.second if request.authorization
+
+    raise ExceptionHandler::Unauthenticated, "Request unauthenticated"
   end
 
   def authenticate_access!
-    unless logged_in?
-      raise ExceptionHandler::Unauthenticated, "Request unauthenticated"
-    end
+    !!current_user
   end
 end
