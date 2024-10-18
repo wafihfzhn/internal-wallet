@@ -5,12 +5,12 @@ module LatestStockPrice
     RAPID_API_BASE_URL = ENV.fetch("RAPID_API_BASE_URL", nil)
 
     class << self
-      def send_request(http_verb, path, body_params = {})
+      def send_request(http_verb, path, body_params: {}, query_params: {})
         response = connection.send(http_verb) do |req|
           req.headers["x-rapidapi-host"] = RAPID_API_HOST
           req.headers["x-rapidapi-key"] = RAPID_API_KEY
           req.body = body_params.to_json
-          req.url path
+          req.url path, query_params
         end
 
         logging_request(path, body_params, response)
@@ -40,7 +40,7 @@ module LatestStockPrice
       end
 
       def raise_standart_error(response)
-        raise StandardError, json_response(response).to_s if response.status != 200
+        raise StandardError, response.body["message"] if response.status != 200
       end
     end
   end
