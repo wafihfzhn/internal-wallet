@@ -19,13 +19,13 @@ jobs:
       - name: Scan for common Rails security vulnerabilities using static analysis
         run: bin/brakeman --no-pager
 
-  tests:
+  test:
     runs-on: ubuntu-latest
     env:
       RAILS_ENV: test
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      HMAC_SECRET: as38ashlasd8liena8ab
+      SECRET_KEY_BASE: as38ashlasd8liena8ab
     concurrency:
       group: build-${{ github.ref }}-${{ matrix.spec-dirs }}
       cancel-in-progress: true
