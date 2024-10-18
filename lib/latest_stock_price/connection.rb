@@ -40,7 +40,7 @@ module LatestStockPrice
       end
 
       def raise_standart_error(response)
-        raise StandardError, response.body["message"] if response.status != 200
+        raise StandardError, response.body["message"] if [ 200, 204 ].exclude?(response.status)
       end
     end
   end
