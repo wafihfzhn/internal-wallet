@@ -18,7 +18,6 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_21_153102) do
     t.bigint "source_wallet_id"
     t.bigint "target_wallet_id"
     t.string "transaction_type", null: false
-    t.string "status", default: "pending"
     t.decimal "amount", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
