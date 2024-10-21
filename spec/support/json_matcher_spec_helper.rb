@@ -1,4 +1,3 @@
-# Matcher utama untuk memvalidasi tipe JSON
 RSpec::Matchers.define :be_json_type do |expected|
   match do |actual|
     begin
