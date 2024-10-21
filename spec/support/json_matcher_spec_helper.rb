@@ -1,80 +1,102 @@
+# Matcher utama untuk memvalidasi tipe JSON
 RSpec::Matchers.define :be_json_type do |expected|
   match do |actual|
-    case expected
-    when Array then expect(actual).to be_array_type(expected, [ "json" ])
-    when Hash then expect(actual).to be_hash_type(expected, [ "json" ])
-    end
-  rescue RSpec::Expectations::ExpectationNotMetError => e
-    @message = e.message
-    @message += "\n#{JSON.pretty_generate(actual)}".truncate(20_000)
-    false
-  end
-
-  failure_message do
-    @message
-  end
-end
-
-RSpec::Matchers.define :be_array_type do |expected, path|
-  match do |actual|
-    expect(actual).to be_a(Array)
-    expected.empty? && (return expect(actual).to eq expected)
-    actual.empty? && (return expect(actual).to eq expected)
-
-    expected = Array.new(actual.length) { expected[0] } if expected.length == 1
-
-    expected.each_with_index.all? do |spec_el, i|
-      @spec_el = spec_el
-      @value_el = value_el = actual[i]
-      @el_path = el_path = path + [ "[#{i}]" ]
-      case spec_el
-      when Array then expect(value_el).to be_array_type(spec_el, el_path)
-      when Hash then expect(value_el).to be_hash_type(spec_el, el_path)
-      when Module then value_el.is_a?(spec_el)
-      when RSpec::Matchers::Composable then expect(value_el).to spec_el
-      when Float then expect(value_el).to be_within(0.00000001).of(spec_el)
-      else value_el == spec_el
+    begin
+      case expected
+      when Array then expect(actual).to match_array_type(expected, [ "json" ])
+      when Hash  then expect(actual).to match_hash_type(expected, [ "json" ])
+      else raise ArgumentError, "Expected value must be an Array or Hash"
       end
+    rescue RSpec::Expectations::ExpectationNotMetError => e
+      store_error_message(e, actual)
+      false
     end
-  rescue RSpec::Expectations::ExpectationNotMetError => e
-    @message = e.message
-    false
   end
 
-  failure_message do
-    @value_el = "\"#{@value_el}\"" if @value_el.is_a?(String)
-    @value_el = "nil" if @value_el.nil?
-    @message || "#{@el_path.join} was #{@value_el}, expected to be #{@spec_el}"
+  failure_message { @message }
+
+  def store_error_message(error, actual)
+    @message = "#{error.message}\n#{JSON.pretty_generate(actual).truncate(20_000)}"
   end
 end
 
-RSpec::Matchers.define :be_hash_type do |expected, path|
+RSpec::Matchers.define :match_array_type do |expected, path|
   match do |actual|
+    begin
+      validate_array_type(actual, expected, path)
+    rescue RSpec::Expectations::ExpectationNotMetError => e
+      @message = e.message
+      false
+    end
+  end
+
+  failure_message { formatted_failure_message }
+
+  def validate_array_type(actual, expected, path)
+    expect(actual).to be_an(Array)
+    return expect(actual).to eq(expected) if expected.empty? || actual.empty?
+
+    expected = normalize_array_size(expected, actual.size)
+    expected.each_with_index.all? do |expected_element, index|
+      validate_element(actual[index], expected_element, path + [ "[#{index}]" ])
+    end
+  end
+
+  def normalize_array_size(expected, size)
+    expected.length == 1 ? Array.new(size) { expected.first } : expected
+  end
+
+  def formatted_failure_message
+    formatted_value = format_value(@actual_value)
+    @message || "#{@element_path.join} was #{formatted_value}, expected to be #{@expected_element}"
+  end
+end
+
+RSpec::Matchers.define :match_hash_type do |expected, path|
+  match do |actual|
+    begin
+      validate_hash_type(actual, expected, path)
+    rescue RSpec::Expectations::ExpectationNotMetError => e
+      @message = e.message
+      false
+    end
+  end
+
+  failure_message { formatted_failure_message }
+
+  def validate_hash_type(actual, expected, path)
     expect(actual).to be_a(Hash)
-    expected.empty? && (return expect(actual).to eq expected)
-    actual.empty? && (return expect(actual).to eq expected)
+    return expect(actual).to eq(expected) if expected.empty? || actual.empty?
 
-    expected.all? do |key, spec_el|
-      @spec_el = spec_el
-      @value_el = value_el = actual.fetch(key) { actual[key.to_s] }
-      @el_path = el_path = path + [ "[:#{key}]" ]
-      case spec_el
-      when Array then expect(value_el).to be_array_type(spec_el, el_path)
-      when Hash then expect(value_el).to be_hash_type(spec_el, el_path)
-      when Module then value_el.is_a?(spec_el)
-      when RSpec::Matchers::Composable then expect(value_el).to spec_el
-      when Float then expect(value_el).to be_within(0.00000001).of(spec_el)
-      else value_el == spec_el
-      end
+    expected.all? do |key, expected_element|
+      value = actual.fetch(key) { actual[key.to_s] }
+      validate_element(value, expected_element, path + [ ":#{key}" ])
     end
-  rescue RSpec::Expectations::ExpectationNotMetError => e
-    @message = e.message
-    false
   end
 
-  failure_message do |_actual|
-    @value_el = "\"#{@value_el}\"" if @value_el.is_a?(String)
-    @value_el = "nil" if @value_el.nil?
-    @message || "#{@el_path.join} was #{@value_el}, expected to be #{@spec_el}"
+  def formatted_failure_message
+    formatted_value = format_value(@actual_value)
+    @message || "#{@element_path.join} was #{formatted_value}, expected to be #{@expected_element}"
   end
+end
+
+def validate_element(actual_value, expected_element, path)
+  @actual_value = actual_value
+  @expected_element = expected_element
+  @element_path = path
+
+  case expected_element
+  when Array  then expect(actual_value).to match_array_type(expected_element, path)
+  when Hash   then expect(actual_value).to match_hash_type(expected_element, path)
+  when Module then actual_value.is_a?(expected_element)
+  when RSpec::Matchers::Composable then expect(actual_value).to expected_element
+  when Float  then expect(actual_value).to be_within(1e-8).of(expected_element)
+  else
+    actual_value == expected_element
+  end
+end
+
+def format_value(value)
+  return "\"#{value}\"" if value.is_a?(String)
+  value.nil? ? "nil" : value
 end
