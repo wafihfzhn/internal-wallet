@@ -1,4 +1,4 @@
-module ControllerSpecHelper
+module AuthSpecHelper
   def as_user(user)
     return invalid_headers if user.nil?
 

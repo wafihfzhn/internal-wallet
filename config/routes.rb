@@ -6,4 +6,9 @@ Rails.application.routes.draw do
   # authentication
   post  "login" => "authentication#login"
   get   "auth"  => "authentication#auth"
+
+  # wallets
+  post  "wallets/deposit"              => "wallets#deposit"
+  post  "wallets/withdraw"             => "wallets#withdraw"
+  post  "wallets/:identifier/transfer" => "wallets#transfer"
 end

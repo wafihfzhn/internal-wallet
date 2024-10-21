@@ -7,7 +7,7 @@ class AuthenticationController < ApplicationController
   end
 
   def auth
-    render_json current_user, AuthOutput
+    render_json current_user, AuthOutput, use: :auth_format
   end
 
   private

@@ -1,30 +1,36 @@
 require "rails_helper"
 
 RSpec.describe User do
-  let(:user) do
-    described_class.new(
+  before do
+    @zoo = create_user(email: "zoo@mail.com")
+    @foo =  described_class.new(
       full_name: "Foo",
       email: "foo@mail.com",
       password: "foo@password",
     )
   end
 
-  it "successfully create the user" do
-    expect(user).to be_valid
-  end
-
-  it "validate of nil full name" do
-    user.full_name = nil
-    expect(user).not_to be_valid
+  it "valid user attributes" do
+    expect(@foo).to be_valid
   end
 
   it "validate of nil email" do
-    user.email = nil
-    expect(user).not_to be_valid
+    @foo.email = nil
+    expect(@foo).not_to be_valid
+  end
+
+  it "validate of nil full name" do
+    @foo.full_name = nil
+    expect(@foo).not_to be_valid
   end
 
   it "validate of nil password" do
-    user.password = nil
-    expect(user).not_to be_valid
+    @foo.password = nil
+    expect(@foo).not_to be_valid
+  end
+
+  it "validate of email already exists" do
+    @foo.email = "zoo@mail.com"
+    expect(@foo).not_to be_valid
   end
 end

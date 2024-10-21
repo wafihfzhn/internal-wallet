@@ -2,11 +2,7 @@ require "rails_helper"
 
 RSpec.describe "Authentication" do
   before do
-    @foo = User.create!(
-      full_name: "Foo",
-      email: "foo@mail.com",
-      password: "foo@password",
-    )
+    @foo = create_user(email: "foo@mail.com", password: "foo@password")
   end
 
   it "successfully user sign in" do
@@ -40,6 +36,10 @@ RSpec.describe "Authentication" do
         id: @foo.id,
         email: @foo.email,
         full_name: @foo.full_name,
+        wallet: {
+          identifier: @foo.wallet.identifier,
+          balance: @foo.wallet.balance,
+        },
       },
     )
   end

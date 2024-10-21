@@ -6,12 +6,20 @@ class AuthOutput < ApiOutput
       full_name: @object.full_name,
       created_at: @object.created_at,
       updated_at: @object.updated_at,
-      token: token,
     }
   end
 
   def login_format
     format.merge(token: token)
+  end
+
+  def auth_format
+    format.merge(
+      wallet: {
+        identifier: @object.wallet.identifier,
+        balance: @object.wallet.balance,
+      },
+    )
   end
 
   private

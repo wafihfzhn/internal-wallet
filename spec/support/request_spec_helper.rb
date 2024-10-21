@@ -3,8 +3,10 @@ require_relative "json_matcher_spec_helper"
 module RequestSpecHelper
   # JSON Requests
   [ :get, :post ].each do |http_method|
-    define_method("#{http_method}_json") do |path, body = {}, headers = {}|
-      json_request(http_method, path, body.as_json, headers)
+    default_headers = { "Content-Type" => "application/json" }
+    define_method("#{http_method}_json") do |path, body = {}, headers = default_headers|
+      body = http_method.eql?(:get) ? body.as_json : body.to_json
+      json_request(http_method, path, body, headers)
     end
   end
 
@@ -27,11 +29,10 @@ module RequestSpecHelper
     expect(response_body).to be_json_type(json) if json
   end
 
-  def expect_error_response(status, message)
+  def expect_error_response(status, message = nil)
     expect(response).to have_http_status(status)
-    expect(response_body[:error][:message]).to eq(message)
+    expect(response_body[:error][:message]).to eq(message) if message
   end
-
 
   private
 
