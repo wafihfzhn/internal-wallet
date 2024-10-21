@@ -1,7 +1,7 @@
 class TransactionOutput < ApiOutput
   def format
     {
-      amount: @object.amount.to_f,
+      amount: @object.amount,
       transaction_type: @object.transaction_type,
       created_at: @object.created_at,
     }
@@ -25,7 +25,7 @@ class TransactionOutput < ApiOutput
     {
       owner_name: wallet.user.full_name,
       identifier: wallet.identifier,
-      balance: wallet.balance.to_f,
+      balance: wallet.balance,
     }
   end
 end

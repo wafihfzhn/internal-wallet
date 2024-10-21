@@ -36,6 +36,10 @@ RSpec.describe "Authentication" do
         id: @foo.id,
         email: @foo.email,
         full_name: @foo.full_name,
+        wallet: {
+          identifier: @foo.wallet.identifier,
+          balance: @foo.wallet.balance,
+        },
       },
     )
   end

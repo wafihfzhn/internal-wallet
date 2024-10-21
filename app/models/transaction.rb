@@ -1,4 +1,5 @@
 class Transaction < ApplicationRecord
+  attribute :amount, :float
   enum :transaction_type, %w[ deposit withdraw transfer ].index_by(&:itself)
 
   with_options presence: true do
