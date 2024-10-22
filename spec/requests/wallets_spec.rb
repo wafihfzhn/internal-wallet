@@ -11,6 +11,10 @@ RSpec.describe "Wallets" do
   describe "Deposit" do
     before { @foo_wallet.update! balance: 1236.47 }
 
+    def expect_wallet_balance
+      aggregate_failures { expect(@zoo_wallet.balance).to be_zero }
+    end
+
     it "updates the target wallet balance when amount is valid" do
       post_json "/wallets/deposit", { amount: 500 }, as_user(@foo)
       expect_response(
@@ -29,16 +33,22 @@ RSpec.describe "Wallets" do
       )
     end
 
+    it "invalid when the amount is not a number" do
+      post_json "/wallets/deposit", { amount: "6523a" }, as_user(@foo)
+      expect_error_response(:unprocessable_content, "Amount is not a number")
+      expect_wallet_balance
+    end
+
     it "invalid when amount is less than 1" do
       post_json "/wallets/deposit", { amount: 0 }, as_user(@zoo)
       expect_error_response(:unprocessable_content, "Amount must be greater than or equal to 1")
-
-      aggregate_failures { expect(@zoo_wallet.balance).to be_zero }
+      expect_wallet_balance
     end
 
     it "invalid when unauntenticated user" do
       post_json "/wallets/deposit", { amount: 1000 }
       expect_error_response(:unauthorized, "Request unauthenticated")
+      expect_wallet_balance
     end
   end
 
@@ -70,6 +80,12 @@ RSpec.describe "Wallets" do
     it "invalid when withdrawing more than the wallet's balance" do
       post_json "/wallets/withdraw", { amount: 1500 }, as_user(@zoo)
       expect_error_response(:unprocessable_entity, "Insufficient wallet's balance")
+      expect_wallet_balance
+    end
+
+    it "iinvalid when the amount is not a number" do
+      post_json "/wallets/withdraw", { amount: "a1" }, as_user(@zoo)
+      expect_error_response(:unprocessable_content, "Amount is not a number")
       expect_wallet_balance
     end
 
@@ -148,6 +164,11 @@ RSpec.describe "Wallets" do
       post_json "/wallets/#{@foo_wallet.identifier}/transfer", { amount: 12500 }, as_user(@foo)
       expect_error_response(:unprocessable_content, "Cannot transfer to the same wallet")
       expect_wallet_balances
+    end
+
+    it "invalid when unauntenticated user" do
+      post_json "/wallets/#{@foo_wallet.identifier}/transfer", { amount: 12575 }
+      expect_error_response(:unauthorized, "Request unauthenticated")
     end
   end
 end
