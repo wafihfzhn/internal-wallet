@@ -6,6 +6,7 @@ gem "puma", "~> 6.4"
 gem "bcrypt", "~> 3.1"
 gem "jwt", "~> 2.9"
 gem "faraday", "~> 2.12"
+gem "pagy", "~> 9.1"
 
 gem "tzinfo-data", platforms: %i[ windows jruby ]
 gem "bootsnap", require: false

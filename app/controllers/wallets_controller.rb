@@ -1,4 +1,11 @@
 class WalletsController < ApplicationController
+  def histories
+    transaction_histories = service.histories(query_params)
+    render_json_array transaction_histories,
+                      TransactionOutput,
+                      use: :list_format
+  end
+
   def deposit
     transaction = service.deposit(params[:amount])
     render_json transaction, TransactionOutput, status: :created

@@ -8,7 +8,8 @@ Rails.application.routes.draw do
   get   "auth"  => "authentication#auth"
 
   # wallets
-  post  "wallets/deposit"              => "wallets#deposit"
-  post  "wallets/withdraw"             => "wallets#withdraw"
-  post  "wallets/:identifier/transfer" => "wallets#transfer"
+  get   "wallets/transaction_histories"   =>  "wallets#histories"
+  post  "wallets/deposit"                 =>  "wallets#deposit"
+  post  "wallets/withdraw"                =>  "wallets#withdraw"
+  post  "wallets/:identifier/transfer"    =>  "wallets#transfer"
 end

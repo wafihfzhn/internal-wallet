@@ -1,10 +1,16 @@
 class ApplicationController < ActionController::API
-  include ExceptionHandler
-  include OutputHandler
-
+  include ExceptionHandler, OutputHandler, Pagy::Backend
   before_action :authenticate_access!
 
   private
+
+  def limit
+    params[:limit] || 25
+  end
+
+  def query_params
+    request.query_parameters.symbolize_keys
+  end
 
   def current_user
     @current_user ||= User.find(decoded_auth_token[:user_id])
