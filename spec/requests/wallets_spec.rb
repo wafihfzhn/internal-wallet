@@ -15,21 +15,222 @@ RSpec.describe "Wallets" do
 
       create_deposit(@logan, amount: 500)
       create_withdraw(@logan, amount: 1500)
-      create_withdraw(@logan, amount: 250)
       create_transfer(@logan, @iden_wallet, amount: 1000)
       create_deposit(@logan, amount: 5000)
-      create_transfer(@logan, @iden_wallet, amount: 1500)
     end
 
-    it "returns the correct wallet transaction histories" do
+    it "returns the correct wallet transaction histories with pagination" do
       get_json "/wallets/transaction_histories", {}, as_user(@logan)
-      binding.break
+      expect_response(
+        :ok,
+        data: [
+          {
+            amount: 5000.0,
+            transaction_type: "deposit",
+            created_at: String,
+            source: {},
+            target: {
+              owner_name: @logan.full_name,
+              identifier: @logan_wallet.identifier,
+            },
+          },
+          {
+            amount: 1000.0,
+            transaction_type: "transfer",
+            created_at: String,
+            source: {
+              owner_name: @logan.full_name,
+              identifier: @logan_wallet.identifier,
+            },
+            target: {
+              owner_name: @iden.full_name,
+              identifier: @iden_wallet.identifier,
+            },
+          },
+          {
+            amount: 1500.0,
+            transaction_type: "withdraw",
+            created_at: String,
+            source: {
+              owner_name: @logan.full_name,
+              identifier: @logan_wallet.identifier,
+            },
+            target: {},
+          },
+          {
+            amount: 500.0,
+            transaction_type: "deposit",
+            created_at: String,
+            source: {},
+            target: {
+              owner_name: @logan.full_name,
+              identifier: @logan_wallet.identifier,
+            },
+          },
+        ],
+        pagination: {
+          count: 4,
+          prev_page: nil,
+          current_page: 1,
+          next_page: nil,
+        },
+      )
     end
 
-    it "returns the correct number of transactions per page" do
+    it "returns transactions with the specified limit" do
+      get_json "/wallets/transaction_histories", { limit: 2 }, as_user(@logan)
+      expect_response(
+        :ok,
+        data: [
+          {
+            amount: 5000.0,
+            transaction_type: "deposit",
+            created_at: String,
+            source: {},
+            target: {
+              owner_name: @logan.full_name,
+              identifier: @logan_wallet.identifier,
+            },
+          },
+          {
+            amount: 1000.0,
+            transaction_type: "transfer",
+            created_at: String,
+            source: {
+              owner_name: @logan.full_name,
+              identifier: @logan_wallet.identifier,
+            },
+            target: {
+              owner_name: @iden.full_name,
+              identifier: @iden_wallet.identifier,
+            },
+          },
+        ],
+        pagination: {
+          count: 4,
+          prev_page: nil,
+          current_page: 1,
+          next_page: 2,
+        },
+      )
     end
 
     it "returns the correct next page when navigating" do
+      get_json "/wallets/transaction_histories", { page: 2, limit: 1 }, as_user(@logan)
+      expect_response(
+        :ok,
+        data: [
+          {
+            amount: 1000.0,
+            transaction_type: "transfer",
+            created_at: String,
+            source: {
+              owner_name: @logan.full_name,
+              identifier: @logan_wallet.identifier,
+            },
+            target: {
+              owner_name: @iden.full_name,
+              identifier: @iden_wallet.identifier,
+            },
+          },
+        ],
+        pagination: {
+          count: 4,
+          prev_page: 1,
+          current_page: 2,
+          next_page: 3,
+        },
+      )
+    end
+
+    context "When filtering transactions by type" do
+      it "returns only deposit transactions" do
+        get_json "/wallets/transaction_histories", { transaction_type: "deposit" }, as_user(@logan)
+        expect_response(
+          :ok,
+          data: [
+            {
+              amount: 5000.0,
+              transaction_type: "deposit",
+              created_at: String,
+              source: {},
+              target: {
+                owner_name: @logan.full_name,
+                identifier: @logan_wallet.identifier,
+              },
+            },
+            {
+              amount: 500.0,
+              transaction_type: "deposit",
+              created_at: String,
+              source: {},
+              target: {
+                owner_name: @logan.full_name,
+                identifier: @logan_wallet.identifier,
+              },
+            },
+          ],
+          pagination: {
+            count: 2,
+            prev_page: nil,
+            current_page: 1,
+            next_page: nil,
+          },
+        )
+      end
+
+      it "returns only withdraw transactions" do
+        get_json "/wallets/transaction_histories", { transaction_type: "withdraw" }, as_user(@logan)
+        expect_response(
+          :ok,
+          data: [
+            {
+              amount: 1500.0,
+              transaction_type: "withdraw",
+              created_at: String,
+              source: {
+                owner_name: @logan.full_name,
+                identifier: @logan_wallet.identifier,
+              },
+              target: {},
+            },
+          ],
+          pagination: {
+            count: 1,
+            prev_page: nil,
+            current_page: 1,
+            next_page: nil,
+          },
+        )
+      end
+
+      it "returns only transfer transactions" do
+        get_json "/wallets/transaction_histories", { transaction_type: "transfer" }, as_user(@logan)
+        expect_response(
+          :ok,
+          data: [
+            {
+              amount: 1000.0,
+              transaction_type: "transfer",
+              created_at: String,
+              source: {
+                owner_name: @logan.full_name,
+                identifier: @logan_wallet.identifier,
+              },
+              target: {
+                owner_name: @iden.full_name,
+                identifier: @iden_wallet.identifier,
+              },
+            },
+          ],
+          pagination: {
+            count: 1,
+            prev_page: nil,
+            current_page: 1,
+            next_page: nil,
+          },
+        )
+      end
     end
   end
 
@@ -108,7 +309,7 @@ RSpec.describe "Wallets" do
       expect_wallet_balance
     end
 
-    it "iinvalid when the amount is not a number" do
+    it "invalid when the amount is not a number" do
       post_json "/wallets/withdraw", { amount: "a1" }, as_user(@iden)
       expect_error_response(:unprocessable_content, "Amount is not a number")
       expect_wallet_balance
@@ -167,7 +368,7 @@ RSpec.describe "Wallets" do
       expect_wallet_balances
     end
 
-    it "iinvalid when the amount is not a number" do
+    it "invalid when the amount is not a number" do
       post_json "/wallets/#{@logan_wallet.identifier}/transfer", { amount: "a1" }, as_user(@iden)
       expect_error_response(:unprocessable_content, "Amount is not a number")
       expect_wallet_balances
