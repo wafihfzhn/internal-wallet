@@ -4,6 +4,11 @@ class WalletService < ApplicationService
     @current_wallet = current_user.wallet
   end
 
+  def histories(query_params)
+    query_params[:user_wallet_id] = @current_user.id
+    TransactionsQuery.new.filter(query_params).scope
+  end
+
   def find_wallet(identifier)
     Wallet.find_by!(identifier: identifier)
   end

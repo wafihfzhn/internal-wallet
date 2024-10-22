@@ -1,4 +1,11 @@
 module OutputHandler
+  def render_json_array(model, klass = default_output, **options)
+    method, status = method_and_status(options)
+    output = model.map { |result| klass.new(result, **options).send(method) }
+
+    render json: { root_key.to_s => output.as_json }, status: status
+  end
+
   def render_json(model, klass = default_output, **options)
     method, status = method_and_status(options)
     output = klass.new(model, **options).send(method)

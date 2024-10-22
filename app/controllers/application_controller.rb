@@ -6,6 +6,10 @@ class ApplicationController < ActionController::API
 
   private
 
+  def query_params
+    request.query_parameters.symbolize_keys
+  end
+
   def current_user
     @current_user ||= User.find(decoded_auth_token[:user_id])
   end
