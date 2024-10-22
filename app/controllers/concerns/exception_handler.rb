@@ -7,11 +7,12 @@ module ExceptionHandler
 
   included do
     rescue_from ActiveRecord::RecordNotFound do |e|
-      render json: { error: { message: e.message } }, status: :not_found
+      render json: { error: { message: "#{e.model} not found" } }, status: :not_found
     end
 
     rescue_from ActiveRecord::RecordInvalid do |e|
-      render json: { error: { message: e.message } }, status: :unprocessable_entity
+      errors_sentence = e.record.errors.full_messages.to_sentence
+      render json: { error: { message: errors_sentence } }, status: :unprocessable_entity
     end
 
     rescue_from ExceptionHandler::Invalid do |e|

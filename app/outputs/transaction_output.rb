@@ -3,25 +3,17 @@ class TransactionOutput < ApiOutput
     {
       amount: @object.amount,
       transaction_type: @object.transaction_type,
+      source: wallet_info(@object.source),
+      target: wallet_info(@object.target),
       created_at: @object.created_at,
     }
-  end
-
-  def deposit_format
-    format.merge(
-      target_wallet: wallet_info(@object.target_wallet),
-    )
-  end
-
-  def withdraw_format
-    format.merge(
-      source_wallet: wallet_info(@object.source_wallet),
-    )
   end
 
   private
 
   def wallet_info(wallet)
+    return {} if wallet.nil?
+
     {
       owner_name: wallet.user.full_name,
       identifier: wallet.identifier,

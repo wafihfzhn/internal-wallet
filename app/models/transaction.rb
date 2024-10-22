@@ -7,29 +7,28 @@ class Transaction < ApplicationRecord
     validates :transaction_type
   end
 
-  belongs_to :source_wallet, class_name: "Wallet", optional: true
-  belongs_to :target_wallet, class_name: "Wallet", optional: true
+  belongs_to :source, class_name: "Wallet", optional: true
+  belongs_to :target, class_name: "Wallet", optional: true
 
   class Deposit < Transaction
-    def self.process!(target_wallet, amount)
-      create!(
-        target_wallet: target_wallet,
-        transaction_type: :deposit,
-        amount: amount,
-      )
+    def self.process!(target, amount)
+      create!(target:, amount:, transaction_type: :deposit)
     end
   end
 
   class Withdraw < Transaction
-    def self.process!(source_wallet, amount)
-      create!(
-        source_wallet: source_wallet,
-        transaction_type: :withdraw,
-        amount: amount,
-      )
+    validates_with WithdrawValidator
+
+    def self.process!(source, amount)
+      create!(source:, amount:, transaction_type: :withdraw)
     end
   end
 
   class Transfer < Transaction
+    validates_with TransferValidator
+
+    def self.process!(source, target, amount)
+      create!(source:, target:, amount:, transaction_type: :transfer)
+    end
   end
 end

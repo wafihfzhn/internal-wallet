@@ -25,7 +25,7 @@ RSpec.describe "Authentication" do
 
   it "invalid unregistered user" do
     post_json "/login", { email: "own@mail.com", password: "own@pass" }
-    expect_error_response(:unprocessable_entity, "Invalid email or password")
+    expect_error_response(:not_found, "User not found")
   end
 
   it "correctly user's auth" do
