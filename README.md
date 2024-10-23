@@ -14,6 +14,10 @@ The architecture of the Internal Wallet API application follows a clear and stru
 4. **Queries**: Data retrieval involves multiple records or requires filtering with queries are utilized.
 5. **Models**: Models represent the data structure and define the relationships between different entities to interact with the database to create, read, update, and delete records.
 6. **Outputs**: The outputs are formatted and returned to the end user as JSON responses.
+7. **Authorization**: The application ensures secure access using **Bearer Token** for authorization. Each request to protected resources must include a valid token in the `Authorization` header:
+```http
+   Authorization: Bearer <your_token_here>
+```
 With the architecture described above, hopefully to make the application more maintainable and scalable.
 
 ## How to run
