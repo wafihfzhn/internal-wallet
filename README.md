@@ -16,9 +16,9 @@ The architecture of the Internal Wallet API application follows a clear and stru
 6. **Outputs**: The outputs are formatted and returned to the end user as JSON responses.
 7. **Authorization**: The application ensures secure access using **Bearer Token** for authorization. Each request to protected resources must include a valid token in the `Authorization` header:
 
-  ```
-    Authorization: Bearer <your_token_here>
-  ```
+   ```
+     Authorization: Bearer <your_token_here>
+   ```
 With the architecture described above, hopefully to make the application more maintainable and scalable.
 
 ## How to run
