@@ -24,6 +24,7 @@ With the architecture described above, hopefully to make the application more ma
 ## How to run
 1. clone this repo
 2. run `bundle install`
-3. create database `bundle exec rails db:create`
-4. run migration `bundle exec rails db:migrate`
-5. run test with `bundle exec rspec`
+3. run `bundle install`
+4. create database `bundle exec rails db:create`
+5. run migration `bundle exec rails db:migrate`
+6. run test with `bundle exec rspec`
