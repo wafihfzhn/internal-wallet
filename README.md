@@ -5,37 +5,46 @@ Internal Wallet is an application designed to efficiently manage and monitor int
 - Ruby 3.2
 - Ruby on Rails 7.2
 - PostgreSQL
+
 For a complete list of dependencies and libraries used, refer to the [Gemfile](Gemfile)
 
 ## Getting Started
 Follow the steps below to set up the application on your local environment:
-1. **Clone the Repository**
-- Start by cloning the repository to your machine:
-```bash
-  git clone https://github.com/wafihfzhn/internal-wallet.git
-  cd internal-wallet
-```
-2. **Install Dependencies**
-- Install all necessary gems with:
-```bash
-  bundle install
-```
-3. **Set Up Environment Variables**
-- Copy the example environment file and fill in the required values:
-```bash
-  cp .env.example .env
-```
-4. **Create the Database and Run Migrations**
-- Set up the database by running:
-```bash
-  bundle exec rails db:create
-  bundle exec rails db:migrate
-```
-5. **Run Tests**
-- Ensure everything works correctly by running the test suite:
-```bash
-  bundle exec rspec
-```
+- **Clone the Repository**
+
+  Start by cloning the repository to your machine:
+  ```bash
+    git clone https://github.com/wafihfzhn/internal-wallet.git
+    cd internal-wallet
+  ```
+
+- **Install Dependencies**
+
+  Install all necessary gems with:
+  ```bash
+    bundle install
+  ```
+
+- **Set Up Environment Variables**
+
+  Copy the example environment file and fill in the required values:
+  ```bash
+    cp .env.example .env
+  ```
+
+- **Create the Database and Run Migrations**
+  Set up the database by running:
+  ```bash
+    bundle exec rails db:create
+    bundle exec rails db:migrate
+  ```
+
+- **Run Tests**
+
+  Ensure everything works correctly by running the test suite:
+  ```bash
+    bundle exec rspec
+  ```
 
 ## Architecture Overview
 The architecture of the Internal Wallet API application follows a clear and structured flow:
