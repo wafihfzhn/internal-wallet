@@ -26,4 +26,4 @@ With the architecture described above, hopefully to make the application more ma
 2. run `bundle install`
 3. create database `bundle exec rails db:create`
 4. run migration `bundle exec rails db:migrate`
-5. run test with `bundle exec rails s`
+5. run test with `bundle exec rspec`
